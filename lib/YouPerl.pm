@@ -17,28 +17,29 @@ get '/' => sub {
     template 'index';
 };
 
-get '/category/:name' => sub {
-    my $name = params->{name};
-
+get '/category/:category' => sub {
+    my $name = param 'category';
+    
     my @items = redis->lrange("youperl:img:cat.$name:0", 0, -1);
     my $files = items2files @items;
+
     template 'images', { images => $files };
 };
 
-get '/category/:name/**' => sub {
-    my $name = params->{name};
-    var category => $name;
+get '/category/*/**' => sub {
+    my ($category) = splat;
+    var category => $category;
     pass;
 };
 
-prefix '/category/*';
-get '/color/:name' => sub {
-    my $color    = params->{name};
+prefix '/category/:category';
+get '/color/:color' => sub {
+    my ($color)  = param 'color';
     my $category = vars->{category};
 
     my @items = redis->smembers("youperl:img:cat.$category.color:0:$color");
     my $files = items2files @items;
-    template 'images', { images => $files };
+    template 'images', { images => $files, color => $color };
 };
 
 
